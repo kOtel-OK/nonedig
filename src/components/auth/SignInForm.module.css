@@ -6,3 +6,8 @@
 .icon-container div {
   text-align: center;
 }
+
+.icon-container div svg:hover {
+  cursor: pointer;
+  color: #0a58ca;
+}

@@ -1,13 +1,15 @@
-import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import LogOutBtn from './LogOutBtn';
 import Navbar from 'react-bootstrap/Navbar';
 import Container from 'react-bootstrap/Container';
 const MainNav = function () {
+  const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
+
   return (
     <Navbar bg="light">
       <Container>
-        <Link to="/">
-          <Navbar.Brand>PassagePro</Navbar.Brand>
-        </Link>
+        <Navbar.Brand>PassagePro</Navbar.Brand>
+        {isLoggedIn && <LogOutBtn />}
       </Container>
     </Navbar>
   );

@@ -1,6 +1,5 @@
-import { Outlet } from 'react-router-dom';
-
 import MainNav from '../components/main-nav/MainNav';
+import Main from './main-content/Main';
 import Footer from '../components/footer/Footer';
 
 import Container from 'react-bootstrap/Container';
@@ -11,7 +10,7 @@ const Layout = function () {
     <>
       <MainNav />
       <Container as="main" className="main">
-        <Outlet />
+        <Main />
       </Container>
       <Row as="footer" className="footer">
         <Footer />

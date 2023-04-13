@@ -2,10 +2,10 @@ import { createSlice } from '@reduxjs/toolkit';
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+import { getAuth, signOut } from 'firebase/auth';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { GoogleAuthProvider } from 'firebase/auth';
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -13,7 +13,6 @@ import { GoogleAuthProvider } from 'firebase/auth';
 
 // Firebase configuration
 const firebaseConfig = {
-  //
   //
   //
   //
@@ -47,10 +46,14 @@ const authSlice = createSlice({
       state.token = actions.payload;
 
       console.log('User has been signed In');
+      console.log(state.token);
     },
     signOut(state) {
       state.isLoggedIn = false;
       state.token = '';
+
+      console.log('User has been signed Out');
+      console.log(state.token);
     },
   },
 });
@@ -111,115 +114,52 @@ export const signInWithEmailThunk = (email, password) => {
   };
 };
 
-// const calculateTimetoLogOut = timeToLogout => {
-//   const currentTime = new Date().getTime();
+export const signInWithGoogleThunk = () => {
+  return dispatch => {
+    signInWithPopup(auth, google)
+      .then(result => {
+        const user = result.user;
+        // Connect to DB and check uid or email if the user exist
+        getDoc(doc(db, 'users', user.uid)).then(result => {
+          // If yes
+          if (result.id === user.uid) {
+            console.log('User exist!');
+          } else {
+            // If no - add user to DB
+            setDoc(doc(db, 'users', user.uid), {
+              name: user.displayName,
+              age: null,
+              id: user.uid,
+              email: user.email,
+              phone: null,
+              role: null,
+            });
+          }
 
-//   const experationLogoutTime = !timeToLogout
-//     ? +localStorage.getItem('experationLogoutTime')
-//     : currentTime + +timeToLogout * 1000;
+          user.getIdToken().then(token => {
+            dispatch(authActions.signIn(token));
+          });
+        });
 
-//   const remainingTime = experationLogoutTime - currentTime;
+        console.log(user);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+};
 
-//   localStorage.setItem('experationLogoutTime', experationLogoutTime);
-
-//   // Value for Timer
-//   return remainingTime;
-// };
-
-// const initialState = {
-//   isLoggedIn: false,
-//   token: '',
-//   isModalOpen: false,
-//   authOption: 'signIn',
-// };
-
-// const authSlice = createSlice({
-//   name: 'auth',
-//   initialState,
-//   reducers: {
-//     sign(state, actions) {
-//       state.token = actions.payload.token;
-
-//       if (actions.payload.authOption === 'signIn') {
-//         state.isLoggedIn = true;
-//       }
-//     },
-//     logOut(state) {
-//       state.isLoggedIn = false;
-//       state.token = '';
-//       state.timeToLogOut = '';
-//     },
-//     openModal(state) {
-//       state.isModalOpen = true;
-//     },
-//     closeModal(state) {
-//       state.isModalOpen = false;
-//     },
-//     authOptionhandler(state, actions) {
-//       state.authOption = actions.payload;
-//     },
-//   },
-// });
-
-// // Санка
-// export const autoLogoutThunk = timeToLogout => {
-//   return dispatch => {
-//     setTimeout(() => {
-//       localStorage.removeItem('token');
-//       localStorage.removeItem('experationLogoutTime');
-
-//       dispatch(authActions.logOut());
-//     }, calculateTimetoLogOut(timeToLogout));
-//   };
-// };
-
-// // Санка
-// export const authRequestThunk = requestData => {
-//   return dispatch => {
-//     fetch(
-//       `https://identitytoolkit.googleapis.com/v1/accounts:${
-//         requestData.authOption === 'signIn' ? 'signInWithPassword' : 'signUp'
-//       }?key=AIzaSyBzFo98u2vRpiRpVjwPqrLrGhi511hD_S0`,
-//       {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify({
-//           email: requestData.enteredEmail,
-//           password: requestData.enteredPassword,
-//           returnSecureToken: true,
-//         }),
-//       }
-//     )
-//       .then(response => {
-//         if (response.ok) {
-//           return response.json();
-//         } else {
-//           return response.json().then(data => {
-//             throw new Error(data.error?.message || 'Something went wrong');
-//           });
-//         }
-//       })
-//       .then(data => {
-//         console.log(data);
-
-//         localStorage.setItem('token', data.idToken);
-
-//         dispatch(
-//           authActions.sign({
-//             token: data.idToken,
-//             authOption: requestData.authOption,
-//           })
-//         );
-
-//         dispatch(autoLogoutThunk(data.expiresIn));
-//       })
-//       .catch(error => {
-//         console.log(error);
-//       });
-//   };
-// };
+export const signOutThunk = () => {
+  return dispatch => {
+    signOut(auth)
+      .then(() => {
+        dispatch(authActions.signOut());
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+};
 
 export const authActions = authSlice.actions;
 export default authSlice.reducer;
