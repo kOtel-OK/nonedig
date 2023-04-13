@@ -1,4 +1,6 @@
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import PrivateRoutes from './utils/PrivateRoutes';
+
 import Layout from './pages/Layout';
 import MainPage from './pages/MainPage';
 import UserPage from './pages/UserPage';
@@ -14,12 +16,22 @@ const router = createBrowserRouter([
         element: <MainPage />,
       },
       {
-        path: 'profile',
-        element: <UserPage />,
+        element: <PrivateRoutes />,
+        children: [
+          {
+            path: 'profile',
+            element: <UserPage />,
+          },
+        ],
       },
       {
-        path: 'admin',
-        element: <AdminPage />,
+        element: <PrivateRoutes />,
+        children: [
+          {
+            path: 'admin',
+            element: <AdminPage />,
+          },
+        ],
       },
     ],
   },

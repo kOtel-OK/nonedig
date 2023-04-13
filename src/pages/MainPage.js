@@ -1,5 +1,11 @@
+import AuthFormContainer from '../components/auth/AuthFormContainer';
+
 const MainPage = function () {
-  return <div>Main Page</div>;
+  return (
+    <>
+      <AuthFormContainer />
+    </>
+  );
 };
 
 export default MainPage;
