@@ -11,3 +11,7 @@
   cursor: pointer;
   color: #0a58ca;
 }
+
+.form-signout {
+  padding: 40px 0;
+}

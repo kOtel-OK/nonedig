@@ -45,22 +45,25 @@ const SignUpForm = function () {
 
   return (
     <>
-      <div className={classes['form-text']}>Sign up with:</div>
+      {/* <div className={classes['form-text']}>Sign up with:</div> */}
       <Row className={classes['icon-container']}>
-        <Col>
+        {/* <Col>
           <Facebook size={48} />
         </Col>
         <Col>
           <Google size={48} />
-        </Col>
+        </Col> */}
       </Row>
-      <div className={classes['form-text']}>OR</div>
+      {/* <div className={classes['form-text']}>OR</div> */}
+      {/* <div className={classes['form-text']}>
+        E-mail & password - your data to log in
+      </div> */}
 
       <Form
         noValidate
         validated={validated}
         onSubmit={onFormSubmit}
-        className={classes.form}
+        className={classes['form-signout']}
       >
         <Form.Group className="mb-3">
           <Form.Control required ref={nameRef} type="text" placeholder="Name" />

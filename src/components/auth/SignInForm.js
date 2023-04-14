@@ -11,6 +11,7 @@ import { Google } from 'react-bootstrap-icons';
 
 import { signInWithEmailThunk } from '../../store/auth-slice';
 import { signInWithGoogleThunk } from '../../store/auth-slice';
+import { signInWithFacebookThunk } from '../../store/auth-slice';
 
 import classes from './SignInForm.module.css';
 
@@ -43,12 +44,17 @@ const SignInForm = function () {
     console.log('Google');
     dispatch(signInWithGoogleThunk());
   };
+  const onFacebookSignIn = event => {
+    console.log('Facebook');
+    dispatch(signInWithFacebookThunk());
+  };
+
   return (
     <>
       <div className={classes['form-text']}>Sign in with:</div>
       <Row className={classes['icon-container']}>
         <Col>
-          <Facebook size={48} />
+          <Facebook onClick={onFacebookSignIn} size={48} />
         </Col>
         <Col>
           <Google onClick={onGoogleSignIn} size={48} />

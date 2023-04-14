@@ -2,11 +2,19 @@ import { createSlice } from '@reduxjs/toolkit';
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
+// For DB Firestore
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
-import { getAuth, signOut } from 'firebase/auth';
+import {
+  getAuth,
+  signOut,
+  fetchSignInMethodsForEmail,
+  linkWithCredential,
+  signInWithCredential,
+} from 'firebase/auth';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { GoogleAuthProvider } from 'firebase/auth';
+import { FacebookAuthProvider } from 'firebase/auth';
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -27,6 +35,9 @@ const auth = getAuth(firebase);
 // Initialize Google Provider
 const google = new GoogleAuthProvider();
 
+// Initialize Facebook Provider
+const facebook = new FacebookAuthProvider();
+
 // Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(firebase);
 
@@ -34,29 +45,60 @@ const initialState = {
   isLoggedIn: false,
   isAdmin: false,
   token: '',
+  currentUser: null,
 };
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    signUpWithEmail() {},
     signIn(state, actions) {
       state.isLoggedIn = true;
-      state.token = actions.payload;
+      state.token = actions.payload.token;
+      state.currentUser = actions.payload.userData;
 
+      console.log('token: ', state.token, 'ID: ', state.currentUser);
       console.log('User has been signed In');
-      console.log(state.token);
     },
     signOut(state) {
       state.isLoggedIn = false;
       state.token = '';
+      state.currentUser = null;
 
       console.log('User has been signed Out');
-      console.log(state.token);
     },
   },
 });
+
+const linkProvidersThunk = (mail, credential) => {
+  return dispatch => {
+    fetchSignInMethodsForEmail(auth, mail)
+      .then(providers => {
+        console.log(providers);
+
+        google.setCustomParameters({ login_hint: mail });
+
+        signInWithPopup(auth, google).then(data => {
+          const googleCredential =
+            GoogleAuthProvider.credentialFromResult(data);
+
+          signInWithCredential(auth, googleCredential).then(data => {
+            linkWithCredential(data.user, credential);
+            console.log(data.user);
+            dispatch(
+              authActions.signIn({
+                token: data.user.accessToken,
+                uid: data.user.uid,
+              })
+            );
+          });
+        });
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+};
 
 export const signUpWithEmailThunk = (
   name,
@@ -69,11 +111,12 @@ export const signUpWithEmailThunk = (
   return dispatch => {
     createUserWithEmailAndPassword(auth, email, password)
       .then(userCredential => {
-        // Signed in
         const user = userCredential.user;
+        const documentRef = doc(db, 'users', user.uid);
+
         console.log(user);
 
-        setDoc(doc(db, 'users', user.uid), {
+        setDoc(documentRef, {
           name,
           age,
           id: user.uid,
@@ -83,13 +126,11 @@ export const signUpWithEmailThunk = (
         });
 
         user.getIdToken().then(token => {
-          dispatch(authActions.signIn(token));
+          dispatch(authActions.signIn({ token, uid: user.uid }));
         });
       })
       .catch(error => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log(errorCode, errorMessage);
+        console.log(error);
       });
   };
 };
@@ -98,18 +139,15 @@ export const signInWithEmailThunk = (email, password) => {
   return dispatch => {
     signInWithEmailAndPassword(auth, email, password)
       .then(userCredential => {
-        // Signed in
         const user = userCredential.user;
         console.log(user);
 
         user.getIdToken().then(token => {
-          dispatch(authActions.signIn(token));
+          dispatch(authActions.signIn({ token, uid: user.uid }));
         });
       })
       .catch(error => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log(errorCode, errorMessage);
+        console.log(error);
       });
   };
 };
@@ -117,27 +155,29 @@ export const signInWithEmailThunk = (email, password) => {
 export const signInWithGoogleThunk = () => {
   return dispatch => {
     signInWithPopup(auth, google)
-      .then(result => {
-        const user = result.user;
-        // Connect to DB and check uid or email if the user exist
-        getDoc(doc(db, 'users', user.uid)).then(result => {
-          // If yes
-          if (result.id === user.uid) {
-            console.log('User exist!');
+      .then(data => {
+        let userData;
+        const user = data.user;
+        const documentRef = doc(db, 'users', user.uid);
+
+        getDoc(documentRef).then(result => {
+          if (result.exists()) {
+            console.log('User exist: ', result.data());
+            userData = result.data();
           } else {
-            // If no - add user to DB
-            setDoc(doc(db, 'users', user.uid), {
+            userData = {
               name: user.displayName,
               age: null,
               id: user.uid,
               email: user.email,
               phone: null,
               role: null,
-            });
+            };
+            setDoc(documentRef, userData);
           }
 
           user.getIdToken().then(token => {
-            dispatch(authActions.signIn(token));
+            dispatch(authActions.signIn({ token, userData }));
           });
         });
 
@@ -145,6 +185,51 @@ export const signInWithGoogleThunk = () => {
       })
       .catch(error => {
         console.log(error);
+      });
+  };
+};
+
+export const signInWithFacebookThunk = () => {
+  return dispatch => {
+    signInWithPopup(auth, facebook)
+      .then(data => {
+        let userData;
+        const user = data.user;
+        const documentRef = doc(db, 'users', user.uid);
+
+        getDoc(documentRef).then(result => {
+          if (result.exists()) {
+            console.log('User exist: ', result.data());
+            userData = result.data();
+          } else {
+            userData = {
+              name: user.displayName,
+              age: null,
+              id: user.uid,
+              email: user.email,
+              phone: null,
+              role: null,
+            };
+            setDoc(documentRef, userData);
+          }
+
+          user.getIdToken().then(token => {
+            dispatch(authActions.signIn({ token, userData }));
+          });
+        });
+
+        console.log(user);
+      })
+      .catch(error => {
+        const errorCode = error.code;
+        const email = error.customData.email;
+        const credential = FacebookAuthProvider.credentialFromError(error);
+
+        if (errorCode === 'auth/account-exists-with-different-credential') {
+          dispatch(linkProvidersThunk(email, credential));
+        } else {
+          console.log('errorCode: ', errorCode);
+        }
       });
   };
 };
