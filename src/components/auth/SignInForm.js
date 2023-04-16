@@ -13,7 +13,7 @@ import { signInWithEmailThunk } from '../../store/auth-slice';
 import { signInWithGoogleThunk } from '../../store/auth-slice';
 import { signInWithFacebookThunk } from '../../store/auth-slice';
 
-import classes from './SignInForm.module.css';
+import classes from './Auth.module.css';
 
 const SignInForm = function () {
   const [validated, setValidated] = useState(false);
@@ -33,18 +33,13 @@ const SignInForm = function () {
     }
 
     setValidated(true);
-    // event.preventDefault();
-
-    // dispatch(
-    //   signInWithEmailThunk(emailRef.current.value, passRef.current.value)
-    // );
   };
 
-  const onGoogleSignIn = event => {
+  const onGoogleSignIn = () => {
     console.log('Google');
     dispatch(signInWithGoogleThunk());
   };
-  const onFacebookSignIn = event => {
+  const onFacebookSignIn = () => {
     console.log('Facebook');
     dispatch(signInWithFacebookThunk());
   };

@@ -10,6 +10,7 @@ import {
   fetchSignInMethodsForEmail,
   linkWithCredential,
   signInWithCredential,
+  sendEmailVerification,
 } from 'firebase/auth';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
@@ -43,9 +44,11 @@ const db = getFirestore(firebase);
 
 const initialState = {
   isLoggedIn: false,
-  isAdmin: false,
+  isAdmin: true,
+  authMode: 'signIn',
   token: '',
   currentUser: null,
+  isModalOpen: false,
 };
 
 const authSlice = createSlice({
@@ -67,6 +70,19 @@ const authSlice = createSlice({
 
       console.log('User has been signed Out');
     },
+    changeAuthMode(state, actions) {
+      if (actions.payload === 'signIn') {
+        state.authMode = 'signIn';
+      } else if (actions.payload === 'signUp') {
+        state.authMode = 'signUp';
+      }
+    },
+    openModal(state) {
+      state.isModalOpen = true;
+    },
+    closeModal(state) {
+      state.isModalOpen = false;
+    },
   },
 });
 
@@ -75,24 +91,50 @@ const linkProvidersThunk = (mail, credential) => {
     fetchSignInMethodsForEmail(auth, mail)
       .then(providers => {
         console.log(providers);
+        const provider = providers[0];
 
-        google.setCustomParameters({ login_hint: mail });
+        if (provider === 'password') {
+          // get credentials or password
+          console.log(auth.currentUser);
+          const userProvidedPassword = prompt('Please type your password');
+          console.log(userProvidedPassword);
+          console.log(auth.currentUser);
 
-        signInWithPopup(auth, google).then(data => {
-          const googleCredential =
-            GoogleAuthProvider.credentialFromResult(data);
+          signInWithEmailAndPassword(auth, mail, userProvidedPassword).then(
+            userCredential => {
+              console.log(userCredential);
+              // signInWithCredential(auth, userCredential).then(data => {
+              linkWithCredential(userCredential.user, credential);
+              console.log(userCredential.user);
+              dispatch(
+                authActions.signIn({
+                  token: userCredential.user.accessToken,
+                  uid: userCredential.user.uid,
+                })
+              );
+              // });
+            }
+          );
+        } else if (provider === 'google.com') {
+          google.setCustomParameters({ login_hint: mail });
 
-          signInWithCredential(auth, googleCredential).then(data => {
-            linkWithCredential(data.user, credential);
-            console.log(data.user);
-            dispatch(
-              authActions.signIn({
-                token: data.user.accessToken,
-                uid: data.user.uid,
-              })
-            );
+          signInWithPopup(auth, google).then(data => {
+            const googleCredential =
+              GoogleAuthProvider.credentialFromResult(data);
+            console.log(googleCredential);
+            signInWithCredential(auth, googleCredential).then(data => {
+              linkWithCredential(data.user, credential);
+              console.log(data.user);
+              dispatch(
+                authActions.signIn({
+                  token: data.user.accessToken,
+                  uid: data.user.uid,
+                })
+              );
+            });
           });
-        });
+        } else {
+        }
       })
       .catch(error => {
         console.log(error);
@@ -116,17 +158,22 @@ export const signUpWithEmailThunk = (
 
         console.log(user);
 
-        setDoc(documentRef, {
-          name,
-          age,
-          id: user.uid,
-          email,
-          phone,
-          role,
-        });
+        // user.getIdToken().then(token => {
+        //   dispatch(authActions.signIn({ token, uid: user.uid }));
+        // });
 
-        user.getIdToken().then(token => {
-          dispatch(authActions.signIn({ token, uid: user.uid }));
+        sendEmailVerification(auth.currentUser).then(() => {
+          console.log('Check your email for verified');
+
+          setDoc(documentRef, {
+            name,
+            age,
+            id: user.uid,
+            email,
+            phone,
+            role,
+          });
+          dispatch(authActions.openModal());
         });
       })
       .catch(error => {
@@ -142,9 +189,14 @@ export const signInWithEmailThunk = (email, password) => {
         const user = userCredential.user;
         console.log(user);
 
-        user.getIdToken().then(token => {
-          dispatch(authActions.signIn({ token, uid: user.uid }));
-        });
+        // If user has verefied his mail - log in
+        if (user.emailVerified) {
+          user.getIdToken().then(token => {
+            dispatch(authActions.signIn({ token, uid: user.uid }));
+          });
+        } else {
+          throw new Error('Email is not verified!');
+        }
       })
       .catch(error => {
         console.log(error);
@@ -158,6 +210,8 @@ export const signInWithGoogleThunk = () => {
       .then(data => {
         let userData;
         const user = data.user;
+        let credential = data;
+
         const documentRef = doc(db, 'users', user.uid);
 
         getDoc(documentRef).then(result => {

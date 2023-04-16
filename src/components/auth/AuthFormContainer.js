@@ -1,64 +1,64 @@
-import { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { authActions } from '../../store/auth-slice';
+
+import PopUpWindow from '../auth/PopUpWindow';
+
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/esm/Row';
 import Col from 'react-bootstrap/esm/Col';
 import SignInForm from './SignInForm';
 import SignUpForm from './SignUpForm';
-import classes from './AuthFormContainer.module.css';
+import classes from './Auth.module.css';
+
+const heading = 'Congrats! You have been registered!';
+const text = 'Check your mail to verify account, and welcome aboard :)';
 
 const AuthFormContainer = function () {
-  const [authMode, setAuthMode] = useState('signIn');
-  const [btnSignInActive, setbtnSignInActive] = useState(false);
-  const [btnSignUpActive, setbtnSignUpActive] = useState(false);
-
-  useEffect(() => {
-    if (authMode === 'signIn') {
-      setbtnSignInActive(true);
-      setbtnSignUpActive(false);
-    } else {
-      setbtnSignUpActive(true);
-      setbtnSignInActive(false);
-    }
-  }, [authMode]);
+  const authMode = useSelector(state => state.auth.authMode);
+  const dispatch = useDispatch();
 
   const toggleAuth = event => {
     const authBtnText = event.target.textContent;
-    event.target.setAttribute('active', '');
+    const authBtns = event.currentTarget.querySelectorAll('div button');
+
+    authBtns.forEach(el => {
+      el.classList.remove('active');
+    });
+
+    event.target.classList.add('active');
 
     if (authBtnText === 'Login') {
-      setAuthMode('signIn');
+      dispatch(authActions.changeAuthMode('signIn'));
     } else if (authBtnText === 'Register') {
-      setAuthMode('signUp');
+      dispatch(authActions.changeAuthMode('signUp'));
     }
   };
 
   return (
-    <div className={classes['auth-form-container']}>
-      <Row onClick={toggleAuth} className={classes['btn-container']}>
-        <Col sm={6}>
-          <Button
-            active={btnSignInActive}
-            size="lg"
-            variant="primary"
-            className={classes['btn-auth']}
-          >
-            Login
-          </Button>
-        </Col>
-        <Col sm={6}>
-          <Button
-            active={btnSignUpActive}
-            size="lg"
-            variant="primary"
-            className={classes['btn-auth']}
-          >
-            Register
-          </Button>
-        </Col>
-      </Row>
-      {authMode === 'signIn' && <SignInForm />}
-      {authMode === 'signUp' && <SignUpForm />}
-    </div>
+    <>
+      <PopUpWindow heading={heading} text={text} />
+
+      <div className={classes['auth-form-container']}>
+        <Row onClick={toggleAuth} className={classes['btn-container']}>
+          <Col sm={6}>
+            <Button
+              size="lg"
+              variant="primary"
+              className={[classes['btn-auth'], 'active']}
+            >
+              Login
+            </Button>
+          </Col>
+          <Col sm={6}>
+            <Button size="lg" variant="primary" className={classes['btn-auth']}>
+              Register
+            </Button>
+          </Col>
+        </Row>
+        {authMode === 'signIn' && <SignInForm />}
+        {authMode === 'signUp' && <SignUpForm />}
+      </div>
+    </>
   );
 };
 

@@ -2,13 +2,9 @@ import { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/esm/Row';
-import Col from 'react-bootstrap/esm/Col';
 import Button from 'react-bootstrap/Button';
 
-import { Facebook } from 'react-bootstrap-icons';
-import { Google } from 'react-bootstrap-icons';
-
-import classes from './SignInForm.module.css';
+import classes from './Auth.module.css';
 
 import { signUpWithEmailThunk } from '../../store/auth-slice';
 
@@ -45,20 +41,6 @@ const SignUpForm = function () {
 
   return (
     <>
-      {/* <div className={classes['form-text']}>Sign up with:</div> */}
-      <Row className={classes['icon-container']}>
-        {/* <Col>
-          <Facebook size={48} />
-        </Col>
-        <Col>
-          <Google size={48} />
-        </Col> */}
-      </Row>
-      {/* <div className={classes['form-text']}>OR</div> */}
-      {/* <div className={classes['form-text']}>
-        E-mail & password - your data to log in
-      </div> */}
-
       <Form
         noValidate
         validated={validated}

@@ -34,3 +34,7 @@ body {
   /* height: 20%; */
   background-color: blueviolet;
 }
+
+.nav-link:hover {
+  color: #4e95fd !important;
+}
