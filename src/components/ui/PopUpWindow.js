@@ -8,8 +8,8 @@ const PopUpWindow = function (props) {
   const dispatch = useDispatch();
 
   const handleClose = () => {
+    props.onPopUpWindowClose();
     dispatch(authActions.closeModal());
-    dispatch(authActions.changeAuthMode('signIn'));
   };
 
   return (
@@ -23,10 +23,10 @@ const PopUpWindow = function (props) {
         <Modal.Header className="justify-content-center">
           <Modal.Title>{props.heading}</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="text-center">{props.text}</Modal.Body>
+        <Modal.Body className="text-center">{props.children}</Modal.Body>
         <Modal.Footer>
           <Button variant="primary" onClick={handleClose}>
-            Got it!
+            {props.btnText}
           </Button>
         </Modal.Footer>
       </Modal>

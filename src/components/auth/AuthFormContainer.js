@@ -1,7 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { authActions } from '../../store/auth-slice';
 
-import PopUpWindow from '../auth/PopUpWindow';
+import PopUpWindow from '../ui/PopUpWindow';
 
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/esm/Row';
@@ -34,10 +34,19 @@ const AuthFormContainer = function () {
     }
   };
 
+  const skipAuthWindowToSignIn = () => {
+    dispatch(authActions.changeAuthMode('signIn'));
+  };
+
   return (
     <>
-      <PopUpWindow heading={heading} text={text} />
-
+      <PopUpWindow
+        heading={heading}
+        btnText="Got It!"
+        onPopUpWindowClose={skipAuthWindowToSignIn}
+      >
+        {text}
+      </PopUpWindow>
       <div className={classes['auth-form-container']}>
         <Row onClick={toggleAuth} className={classes['btn-container']}>
           <Col sm={6}>

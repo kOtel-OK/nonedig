@@ -1,12 +1,17 @@
-import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { getAllUsersThunk } from '../../store/admin-slice';
+
 import Nav from 'react-bootstrap/Nav';
 
 const MenuContent = function (props) {
-  const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
-  const isAdmin = useSelector(state => state.auth.isAdmin);
+  const dispatch = useDispatch();
 
   const onMenuClick = event => {
-    console.log(event);
+    if (event === 'edit-users') {
+      dispatch(getAllUsersThunk());
+    }
+
+    // Close menu
     props.onMenuItemClick();
   };
 

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import LogOutBtn from './LogOutBtn';
 import MenuContent from './MenuContent';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import { List } from 'react-bootstrap-icons';
@@ -23,8 +22,6 @@ const UserMenu = function () {
         </Offcanvas.Header>
         <Offcanvas.Body>
           <MenuContent onMenuItemClick={handleClose} />
-          {/* {isLoggedIn && <LogOutBtn />} */}
-          {/* <LogOutBtn /> */}
         </Offcanvas.Body>
       </Offcanvas>
     </>
