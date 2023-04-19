@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { firebase, db } from '../firebase';
+import { adminActions } from './admin-slice';
 
 // For DB Firestore
 import { doc, setDoc, getDoc } from 'firebase/firestore';
@@ -52,6 +53,7 @@ const authSlice = createSlice({
     },
     signOut(state) {
       state.isLoggedIn = false;
+      state.isAdmin = false;
       state.token = '';
       state.currentUser = null;
 
@@ -90,7 +92,6 @@ const linkProvidersThunk = (mail, credential) => {
           signInWithEmailAndPassword(auth, mail, userProvidedPassword).then(
             userCredential => {
               console.log(userCredential);
-              // signInWithCredential(auth, userCredential).then(data => {
               linkWithCredential(userCredential.user, credential);
               console.log(userCredential.user);
               dispatch(
@@ -99,7 +100,6 @@ const linkProvidersThunk = (mail, credential) => {
                   uid: userCredential.user.uid,
                 })
               );
-              // });
             }
           );
         } else if (provider === 'google.com') {
@@ -129,14 +129,7 @@ const linkProvidersThunk = (mail, credential) => {
   };
 };
 
-export const signUpWithEmailThunk = (
-  name,
-  email,
-  password,
-  phone,
-  age,
-  role
-) => {
+export const signUpWithEmailThunk = (name, email, password, phone, age) => {
   return dispatch => {
     createUserWithEmailAndPassword(auth, email, password)
       .then(userCredential => {
@@ -152,7 +145,7 @@ export const signUpWithEmailThunk = (
             id: user.uid,
             email,
             phone,
-            role,
+            role: 'passenger',
           });
           dispatch(authActions.openModal());
         });
@@ -208,7 +201,7 @@ export const signInWithGoogleThunk = () => {
               id: user.uid,
               email: user.email,
               phone: null,
-              role: null,
+              role: 'passenger',
             };
             setDoc(documentRef, userData);
           }
@@ -245,7 +238,7 @@ export const signInWithFacebookThunk = () => {
               id: user.uid,
               email: user.email,
               phone: null,
-              role: null,
+              role: 'passenger',
             };
             setDoc(documentRef, userData);
           }
@@ -276,122 +269,19 @@ export const signOutThunk = () => {
     signOut(auth)
       .then(() => {
         dispatch(authActions.signOut());
+        dispatch(
+          adminActions.changePages({
+            main: true,
+            users: false,
+            trips: false,
+          })
+        );
       })
       .catch(error => {
         console.log(error);
       });
   };
 };
-
-// const calculateTimetoLogOut = timeToLogout => {
-//   const currentTime = new Date().getTime();
-
-//   const experationLogoutTime = !timeToLogout
-//     ? +localStorage.getItem('experationLogoutTime')
-//     : currentTime + +timeToLogout * 1000;
-
-//   const remainingTime = experationLogoutTime - currentTime;
-
-//   localStorage.setItem('experationLogoutTime', experationLogoutTime);
-
-//   // Value for Timer
-//   return remainingTime;
-// };
-
-// const initialState = {
-//   isLoggedIn: false,
-//   token: '',
-//   isModalOpen: false,
-//   authOption: 'signIn',
-// };
-
-// const authSlice = createSlice({
-//   name: 'auth',
-//   initialState,
-//   reducers: {
-//     sign(state, actions) {
-//       state.token = actions.payload.token;
-
-//       if (actions.payload.authOption === 'signIn') {
-//         state.isLoggedIn = true;
-//       }
-//     },
-//     logOut(state) {
-//       state.isLoggedIn = false;
-//       state.token = '';
-//       state.timeToLogOut = '';
-//     },
-//     openModal(state) {
-//       state.isModalOpen = true;
-//     },
-//     closeModal(state) {
-//       state.isModalOpen = false;
-//     },
-//     authOptionhandler(state, actions) {
-//       state.authOption = actions.payload;
-//     },
-//   },
-// });
-
-// // Санка
-// export const autoLogoutThunk = timeToLogout => {
-//   return dispatch => {
-//     setTimeout(() => {
-//       localStorage.removeItem('token');
-//       localStorage.removeItem('experationLogoutTime');
-
-//       dispatch(authActions.logOut());
-//     }, calculateTimetoLogOut(timeToLogout));
-//   };
-// };
-
-// // Санка
-// export const authRequestThunk = requestData => {
-//   return dispatch => {
-//     fetch(
-//       `https://identitytoolkit.googleapis.com/v1/accounts:${
-//         requestData.authOption === 'signIn' ? 'signInWithPassword' : 'signUp'
-//       }?key=AIzaSyBzFo98u2vRpiRpVjwPqrLrGhi511hD_S0`,
-//       {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify({
-//           email: requestData.enteredEmail,
-//           password: requestData.enteredPassword,
-//           returnSecureToken: true,
-//         }),
-//       }
-//     )
-//       .then(response => {
-//         if (response.ok) {
-//           return response.json();
-//         } else {
-//           return response.json().then(data => {
-//             throw new Error(data.error?.message || 'Something went wrong');
-//           });
-//         }
-//       })
-//       .then(data => {
-//         console.log(data);
-
-//         localStorage.setItem('token', data.idToken);
-
-//         dispatch(
-//           authActions.sign({
-//             token: data.idToken,
-//             authOption: requestData.authOption,
-//           })
-//         );
-
-//         dispatch(autoLogoutThunk(data.expiresIn));
-//       })
-//       .catch(error => {
-//         console.log(error);
-//       });
-//   };
-// };
 
 export const authActions = authSlice.actions;
 export default authSlice.reducer;

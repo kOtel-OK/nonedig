@@ -4,13 +4,16 @@ import { authActions } from '../../store/auth-slice';
 import { useSelector, useDispatch } from 'react-redux';
 import UserList from './UserList';
 import PopUpWindow from '../ui/PopUpWindow';
-import Form from 'react-bootstrap/Form';
+import UserRoleForm from './UserRoleForm';
+import Trips from './trips/Trips';
+import { Row, Col } from 'react-bootstrap';
 
-const Admin = function () {
+const Admin = function (props) {
   const [userRole, setUserRole] = useState(null);
   const [UID, setUID] = useState(null);
   const dispatch = useDispatch();
   const users = useSelector(state => state.admin.users);
+  const pages = useSelector(state => state.admin.pages);
 
   const getUserData = (node, id, role) => {
     setUserRole(role);
@@ -20,39 +23,32 @@ const Admin = function () {
     dispatch(authActions.openModal());
   };
 
-  const editUserData = () => {
-    if (userRole === null) return;
-
-    dispatch(editUserRoleThunk(UID, userRole));
+  const getRole = role => {
+    editUserData(role);
   };
 
-  const userRoleHandler = event => {
-    const role = event.target.value;
+  const editUserData = role => {
+    console.log('Edit role', userRole);
+    if (role === null) return;
 
-    if (event.target.value !== 'option-title') {
-      setUserRole(role);
-    } else {
-      setUserRole(null);
-    }
+    dispatch(editUserRoleThunk(UID, role));
   };
+
   return (
     <>
-      <PopUpWindow
-        heading="Edit user role!"
-        btnText="Submit"
-        onPopUpWindowClose={editUserData}
-      >
-        <Form.Select
-          aria-label="Default select example"
-          onChange={userRoleHandler}
-        >
-          <option value="option-title">Open this select menu</option>
-          <option value="passenger">Passenger</option>
-          <option value="driver">Driver</option>
-          <option value="dispatcher">Dispatcher</option>
-        </Form.Select>
+      <PopUpWindow heading="Edit user role!">
+        <UserRoleForm onGetRole={getRole} />
       </PopUpWindow>
-      <UserList onRoleClick={getUserData} users={users} />
+
+      {pages.users && <UserList onRoleClick={getUserData} users={users} />}
+      {pages.trips && <Trips />}
+      {pages.main && (
+        <Row>
+          <Col className="text-center" xs="12">
+            Welcome to admin page!
+          </Col>
+        </Row>
+      )}
     </>
   );
 };

@@ -82,15 +82,7 @@ const SignInForm = function () {
           />
           <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
         </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Check
-            required
-            type="checkbox"
-            label="Check me out"
-            feedback="You must agree before submitting."
-            feedbackType="invalid"
-          />
-        </Form.Group>
+
         <Row>
           <Button variant="primary" type="submit" size="lg">
             Submit

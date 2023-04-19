@@ -17,7 +17,6 @@ const SignUpForm = function () {
   const emailRef = useRef();
   const phoneRef = useRef();
   const passRef = useRef();
-  const roleRef = useRef();
 
   const onFormSubmit = event => {
     const form = event.currentTarget;
@@ -30,8 +29,7 @@ const SignUpForm = function () {
           emailRef.current.value,
           passRef.current.value,
           phoneRef.current.value,
-          ageRef.current.value,
-          roleRef.current.value
+          ageRef.current.value
         )
       );
     }
@@ -55,14 +53,7 @@ const SignUpForm = function () {
           <Form.Control required ref={ageRef} type="text" placeholder="Age" />
           <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
         </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>You register as:</Form.Label>
-          <Form.Select ref={roleRef} aria-label="Select role">
-            <option value="passenger">Passenger</option>
-            <option value="driver">Driver</option>
-            <option value="dispatcher">Dispatcher</option>
-          </Form.Select>
-        </Form.Group>
+
         <Form.Group className="mb-3">
           <Form.Control
             required

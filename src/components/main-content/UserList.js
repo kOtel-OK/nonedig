@@ -7,7 +7,7 @@ const UserList = function (props) {
     return (
       <Form>
         <Row>
-          {props.users.map((el, idx) => {
+          {props.users.map(el => {
             const randomKey = Date.now() + Math.trunc(Math.random() * 1000 + 1);
             return (
               <UserListItem

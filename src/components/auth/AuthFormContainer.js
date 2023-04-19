@@ -2,6 +2,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { authActions } from '../../store/auth-slice';
 
 import PopUpWindow from '../ui/PopUpWindow';
+import VerifyEmailWindow from './VerifyEmailWindow';
 
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/esm/Row';
@@ -9,9 +10,6 @@ import Col from 'react-bootstrap/esm/Col';
 import SignInForm from './SignInForm';
 import SignUpForm from './SignUpForm';
 import classes from './Auth.module.css';
-
-const heading = 'Congrats! You have been registered!';
-const text = 'Check your mail to verify account, and welcome aboard :)';
 
 const AuthFormContainer = function () {
   const authMode = useSelector(state => state.auth.authMode);
@@ -34,19 +32,12 @@ const AuthFormContainer = function () {
     }
   };
 
-  const skipAuthWindowToSignIn = () => {
-    dispatch(authActions.changeAuthMode('signIn'));
-  };
-
   return (
     <>
-      <PopUpWindow
-        heading={heading}
-        btnText="Got It!"
-        onPopUpWindowClose={skipAuthWindowToSignIn}
-      >
-        {text}
+      <PopUpWindow heading="Congrats! You have been registered!">
+        <VerifyEmailWindow />
       </PopUpWindow>
+
       <div className={classes['auth-form-container']}>
         <Row onClick={toggleAuth} className={classes['btn-container']}>
           <Col sm={6}>

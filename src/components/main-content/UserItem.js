@@ -14,10 +14,10 @@ const UserItem = function (props) {
   };
   return (
     <Form.Group as={Row} controlId={props.id}>
-      <Form.Label column xs="2">
+      <Form.Label column xs="3">
         {props.name}
       </Form.Label>
-      <Col xs="10">
+      <Col xs="9">
         <Form.Control
           plaintext={props.plain ?? true}
           readOnly={props.readonly ?? true}
