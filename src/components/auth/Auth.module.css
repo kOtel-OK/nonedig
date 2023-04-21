@@ -17,8 +17,11 @@
 }
 
 .auth-form-container {
-  width: 380px;
+  width: 360px;
   margin: 0 auto;
+  background-color: #eee8da9c;
+  border-radius: 10px;
+  padding: 20px;
 }
 
 .btn-container div {

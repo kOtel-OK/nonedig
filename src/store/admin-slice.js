@@ -9,7 +9,6 @@ import {
   doc,
   getDoc,
   setDoc,
-  addDoc,
 } from 'firebase/firestore';
 
 const initialState = {
@@ -116,20 +115,18 @@ export const getAllTripsThunk = function () {
 
 export const createTripThunk = function (trip) {
   return dispatch => {
-    console.log('Create trip: ', trip);
+    const tripRef = doc(collection(db, 'trips'));
 
-    const tripRef = collection(db, 'trips');
-    addDoc(tripRef, trip).then(data => {
+    // Add ID field to trip
+    trip.id = tripRef.id;
+
+    // TODO
+    // Add ID field to trip
+    setDoc(tripRef, trip).then(data => {
       console.log('Trip has been created', data);
 
       dispatch(getAllTripsThunk());
     });
-
-    // create new trip
-    // update DB with new trip
-    // get all trips with getAllTripsThunk
-    // update state
-    // update UI
   };
 };
 

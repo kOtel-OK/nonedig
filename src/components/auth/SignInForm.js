@@ -1,17 +1,23 @@
 import { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { authActions } from '../../store/auth-slice';
 
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/esm/Row';
 import Col from 'react-bootstrap/esm/Col';
 import Button from 'react-bootstrap/Button';
 
+import PopUpWindow from '../ui/PopUpWindow';
+import PhoneSignInForm from './PhoneSignInForm';
+
 import { Facebook } from 'react-bootstrap-icons';
 import { Google } from 'react-bootstrap-icons';
+import { PhoneFill } from 'react-bootstrap-icons';
 
 import { signInWithEmailThunk } from '../../store/auth-slice';
 import { signInWithGoogleThunk } from '../../store/auth-slice';
 import { signInWithFacebookThunk } from '../../store/auth-slice';
+import { enableCaptchaThunk } from '../../store/auth-slice';
 
 import classes from './Auth.module.css';
 
@@ -36,20 +42,28 @@ const SignInForm = function () {
   };
 
   const onGoogleSignIn = () => {
-    console.log('Google');
     dispatch(signInWithGoogleThunk());
   };
   const onFacebookSignIn = () => {
-    console.log('Facebook');
     dispatch(signInWithFacebookThunk());
+  };
+  const onPhoneSignIn = event => {
+    dispatch(authActions.openModal());
+    dispatch(enableCaptchaThunk());
   };
 
   return (
     <>
+      <PopUpWindow heading="Confirm your phone number">
+        <PhoneSignInForm />
+      </PopUpWindow>
       <div className={classes['form-text']}>Sign in with:</div>
       <Row className={classes['icon-container']}>
         <Col>
           <Facebook onClick={onFacebookSignIn} size={48} />
+        </Col>
+        <Col>
+          <PhoneFill onClick={onPhoneSignIn} size={48} />
         </Col>
         <Col>
           <Google onClick={onGoogleSignIn} size={48} />
@@ -68,7 +82,7 @@ const SignInForm = function () {
             required
             ref={emailRef}
             type="email"
-            placeholder="Enter email or phone"
+            placeholder="Email"
           />
           <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
         </Form.Group>

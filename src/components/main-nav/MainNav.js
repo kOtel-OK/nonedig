@@ -1,8 +1,9 @@
 import { useSelector } from 'react-redux';
 import LogOutBtn from './LogOutBtn';
-import UserMenu from './UserMenu';
+import UserMenu from './SideBarMenu';
 import Navbar from 'react-bootstrap/Navbar';
 import Container from 'react-bootstrap/Container';
+
 const MainNav = function () {
   const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
 

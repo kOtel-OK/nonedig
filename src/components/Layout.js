@@ -15,6 +15,7 @@ const Layout = function () {
       <Row as="footer" className="footer">
         <Footer />
       </Row>
+      <Row id="recaptcha-container"></Row>
     </>
   );
 };

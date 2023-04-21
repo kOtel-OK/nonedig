@@ -3,7 +3,14 @@ import { firebase, db } from '../firebase';
 import { adminActions } from './admin-slice';
 
 // For DB Firestore
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import {
+  doc,
+  setDoc,
+  getDoc,
+  query,
+  collection,
+  where,
+} from 'firebase/firestore';
 import {
   getAuth,
   signOut,
@@ -11,6 +18,8 @@ import {
   linkWithCredential,
   signInWithCredential,
   sendEmailVerification,
+  signInWithPhoneNumber,
+  RecaptchaVerifier,
 } from 'firebase/auth';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
@@ -19,7 +28,8 @@ import { FacebookAuthProvider } from 'firebase/auth';
 
 // Initialize Firebase Authentication and get a reference to the service
 const auth = getAuth(firebase);
-
+// Set locale
+auth.useDeviceLanguage();
 // Initialize Google Provider
 const google = new GoogleAuthProvider();
 // Initialize Facebook Provider
@@ -32,6 +42,7 @@ const initialState = {
   token: '',
   currentUser: null,
   isModalOpen: false,
+  captchaStatus: false,
 };
 
 const authSlice = createSlice({
@@ -57,7 +68,7 @@ const authSlice = createSlice({
       state.token = '';
       state.currentUser = null;
 
-      console.log('User has been signed Out');
+      console.log('The user is logged out');
     },
     changeAuthMode(state, actions) {
       if (actions.payload === 'signIn') {
@@ -72,6 +83,9 @@ const authSlice = createSlice({
     closeModal(state) {
       state.isModalOpen = false;
     },
+    changeCaptchaStatus(state, actions) {
+      state.captchaStatus = actions.payload;
+    },
   },
 });
 
@@ -79,21 +93,18 @@ const linkProvidersThunk = (mail, credential) => {
   return dispatch => {
     fetchSignInMethodsForEmail(auth, mail)
       .then(providers => {
-        console.log(providers);
+        // An array of available providers
         const provider = providers[0];
 
         if (provider === 'password') {
           // get credentials or password
-          console.log(auth.currentUser);
+          // TODO
+          // Add pop up window for password
           const userProvidedPassword = prompt('Please type your password');
-          console.log(userProvidedPassword);
-          console.log(auth.currentUser);
 
           signInWithEmailAndPassword(auth, mail, userProvidedPassword).then(
             userCredential => {
-              console.log(userCredential);
               linkWithCredential(userCredential.user, credential);
-              console.log(userCredential.user);
               dispatch(
                 authActions.signIn({
                   token: userCredential.user.accessToken,
@@ -108,10 +119,8 @@ const linkProvidersThunk = (mail, credential) => {
           signInWithPopup(auth, google).then(data => {
             const googleCredential =
               GoogleAuthProvider.credentialFromResult(data);
-            console.log(googleCredential);
             signInWithCredential(auth, googleCredential).then(data => {
               linkWithCredential(data.user, credential);
-              console.log(data.user);
               dispatch(
                 authActions.signIn({
                   token: data.user.accessToken,
@@ -260,6 +269,92 @@ export const signInWithFacebookThunk = () => {
         } else {
           console.log('errorCode: ', errorCode);
         }
+      });
+  };
+};
+
+export const enableCaptchaThunk = () => {
+  return dispatch => {
+    window.recaptchaVerifier = new RecaptchaVerifier(
+      'recaptcha-container',
+      {
+        size: 'invisible',
+        callback: token => {
+          // console.log(token);
+        },
+        'expired-callback': () => {
+          console.log('expired');
+        },
+        'error-callback': error => {
+          console.log(error);
+        },
+      },
+      auth
+    );
+  };
+};
+
+export const signInWithPhoneThunk = phoneNumber => {
+  return dispatch => {
+    dispatch(authActions.changeCaptchaStatus(true));
+
+    const appVerifier = window.recaptchaVerifier;
+
+    signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+      .then(confirmationResult => {
+        console.log('SMS SENT!');
+        window.confirmationResult = confirmationResult;
+      })
+      .catch(error => {
+        console.log(error, 'SMS not sent');
+      });
+  };
+};
+
+export const confirmPhoneNumberThunk = confirmCode => {
+  return dispatch => {
+    window.confirmationResult
+      .confirm(confirmCode)
+      .then(function (result) {
+        // User has been verified
+        // Close window
+        dispatch(authActions.closeModal());
+        const user = result.user;
+        let userData;
+
+        // Get ref to doc by ID
+        const documentUidRef = doc(db, 'users', user.uid);
+        // Get ref to doc by phone field
+        // TODO
+        // Check user in DB by phone number
+        const documentPhoneRef = query(
+          collection(db, 'users'),
+          where('phone', '==', user.phoneNumber)
+        );
+
+        getDoc(documentUidRef).then(result => {
+          if (result.exists()) {
+            console.log('User exist: ', result.data());
+            userData = result.data();
+          } else {
+            userData = {
+              name: null,
+              age: null,
+              id: user.uid,
+              email: null,
+              phone: user.phoneNumber,
+              role: 'passenger',
+            };
+            setDoc(documentUidRef, userData);
+          }
+
+          user.getIdToken().then(token => {
+            dispatch(authActions.signIn({ token, userData }));
+          });
+        });
+      })
+      .catch(error => {
+        console.log(error);
       });
   };
 };

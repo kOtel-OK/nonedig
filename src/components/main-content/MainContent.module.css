@@ -1,5 +1,6 @@
 .card {
   width: calc(50% - 0.5rem);
+  background-color: #eee8dad9;
 }
 
 @media (max-width: 992px) {

@@ -1,6 +1,6 @@
 const TripsListItem = function (props) {
   return (
-    <tr>
+    <tr id={props.id}>
       <td>{props.item}</td>
       <td>{props.from}</td>
       <td>{props.to}</td>

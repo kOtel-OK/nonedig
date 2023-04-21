@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import MenuContent from './MenuContent';
+import SideBarContent from './SideBarContent';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import { List } from 'react-bootstrap-icons';
 import classes from './MainNav.module.css';
 
-const UserMenu = function () {
+const SideBarMenu = function () {
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
@@ -21,11 +21,11 @@ const UserMenu = function () {
           <Offcanvas.Title>Menu</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          <MenuContent onMenuItemClick={handleClose} />
+          <SideBarContent onMenuItemClick={handleClose} />
         </Offcanvas.Body>
       </Offcanvas>
     </>
   );
 };
 
-export default UserMenu;
+export default SideBarMenu;

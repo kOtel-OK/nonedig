@@ -1,9 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { authActions } from '../../store/auth-slice';
 
-import PopUpWindow from '../ui/PopUpWindow';
-import VerifyEmailWindow from './VerifyEmailWindow';
-
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/esm/Row';
 import Col from 'react-bootstrap/esm/Col';
@@ -34,10 +31,6 @@ const AuthFormContainer = function () {
 
   return (
     <>
-      <PopUpWindow heading="Congrats! You have been registered!">
-        <VerifyEmailWindow />
-      </PopUpWindow>
-
       <div className={classes['auth-form-container']}>
         <Row onClick={toggleAuth} className={classes['btn-container']}>
           <Col sm={6}>

@@ -1,5 +1,8 @@
 import { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import PopUpWindow from '../ui/PopUpWindow';
+import VerifyEmailWindow from './VerifyEmailWindow';
+
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/esm/Row';
 import Button from 'react-bootstrap/Button';
@@ -39,6 +42,9 @@ const SignUpForm = function () {
 
   return (
     <>
+      <PopUpWindow heading="Congrats! You have been registered!">
+        <VerifyEmailWindow />
+      </PopUpWindow>
       <Form
         noValidate
         validated={validated}

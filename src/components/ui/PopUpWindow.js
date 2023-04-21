@@ -22,12 +22,7 @@ const PopUpWindow = function (props) {
 
   return (
     <>
-      <Modal
-        show={isModalOpen}
-        // backdrop="static"
-        keyboard={false}
-        onHide={handleClose}
-      >
+      <Modal show={isModalOpen} keyboard={false} onHide={handleClose}>
         <Modal.Header className="justify-content-center">
           <Modal.Title>{props.heading}</Modal.Title>
         </Modal.Header>

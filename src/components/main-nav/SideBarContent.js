@@ -1,10 +1,13 @@
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { getAllUsersThunk } from '../../store/admin-slice';
 import { getAllTripsThunk } from '../../store/admin-slice';
 import { adminActions } from '../../store/admin-slice';
+import SideBarAdmin from './SideBarAdmin';
+import SideBarUser from './SideBarUser';
 import Nav from 'react-bootstrap/Nav';
 
 const MenuContent = function (props) {
+  const isAdmin = useSelector(state => state.auth.isAdmin);
   const dispatch = useDispatch();
 
   const onMenuClick = event => {
@@ -30,9 +33,7 @@ const MenuContent = function (props) {
 
   return (
     <Nav onSelect={onMenuClick} className="flex-column">
-      <Nav.Link eventKey="main">Main</Nav.Link>
-      <Nav.Link eventKey="users">Users</Nav.Link>
-      <Nav.Link eventKey="trips">Trips</Nav.Link>
+      {isAdmin ? <SideBarAdmin /> : <SideBarUser />}
     </Nav>
   );
 };
