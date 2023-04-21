@@ -8,10 +8,12 @@ const MainNav = function () {
   const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
 
   return (
-    <Navbar bg="light">
+    <Navbar bg="none">
       <Container>
         {isLoggedIn && <UserMenu />}
-        <Navbar.Brand as="div">PassagePro</Navbar.Brand>
+        <Navbar.Brand as="div" className="fs-2 text-white">
+          PassagePro
+        </Navbar.Brand>
         {isLoggedIn && <LogOutBtn />}
       </Container>
     </Navbar>

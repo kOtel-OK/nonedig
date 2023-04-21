@@ -4,8 +4,6 @@ import Table from 'react-bootstrap/Table';
 import classes from './Trips.module.css';
 
 const TripsList = function (props) {
-  console.log(props.trips.length);
-
   return (
     <Table
       className={['text-center', classes['trip-list']]}

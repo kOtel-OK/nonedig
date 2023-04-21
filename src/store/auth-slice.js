@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { firebase, db } from '../firebase';
 import { adminActions } from './admin-slice';
+import { firebase, db } from '../firebase';
 
 // For DB Firestore
 import {
@@ -11,18 +11,21 @@ import {
   collection,
   where,
 } from 'firebase/firestore';
+
 import {
   getAuth,
   signOut,
   fetchSignInMethodsForEmail,
   linkWithCredential,
+  signInWithPopup,
   signInWithCredential,
   sendEmailVerification,
+  signInWithEmailAndPassword,
   signInWithPhoneNumber,
   RecaptchaVerifier,
+  createUserWithEmailAndPassword,
 } from 'firebase/auth';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+
 import { GoogleAuthProvider } from 'firebase/auth';
 import { FacebookAuthProvider } from 'firebase/auth';
 
@@ -262,6 +265,7 @@ export const signInWithFacebookThunk = () => {
       .catch(error => {
         const errorCode = error.code;
         const email = error.customData.email;
+        // Get Facebook credential from error
         const credential = FacebookAuthProvider.credentialFromError(error);
 
         if (errorCode === 'auth/account-exists-with-different-credential') {
@@ -337,6 +341,8 @@ export const confirmPhoneNumberThunk = confirmCode => {
             console.log('User exist: ', result.data());
             userData = result.data();
           } else {
+            // TODO
+            // Add some missing data
             userData = {
               name: null,
               age: null,
