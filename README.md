@@ -1,70 +1,35 @@
-# Getting Started with Create React App
+# CRM для пасажирських перевезень
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Додаток створено за допомоги Create React App. Для управляння глобальним станом використовується Redux (Redux toolkit), де стан поділено на «слайси» в яких асинхронна логіка реалізується за допомоги ‘Redux Thunk’. Також активно використовуються react hooks. 
+При створенні додатку використовується таке BaaS рішення як Firebase – автентифікація та Firestore, як БД.
 
-## Available Scripts
+## Автентифікація користувача
 
-In the project directory, you can run:
+Зареєструватися та увійти можливо як за допомого email/password так і використовуючи Google, Facebook. Якщо користувач має той самий email у всіх провайдерах, то при кожному вході виконується злиття акаунтів. 
+Якщо користувач зареєструвався за допомоги email/password, йому на пошту приходе запит для підтвердження email. Це потрібно для того, щоб акаунт отримав статус «verified» - це вирішує проблему з перезаписом акаунтів з боку Google, Facebook. Користувач зможе увійти в додаток тільки після того, як верифікує пошту.
+Якщо у зареєстрованому email роль – «admin», то при вході користувач потрапляє в адмін-панель.
 
-### `npm start`
+При авторизації через телефон, користувачу буде відправлено код на телефон, пісял вводу коду буде проведено авторизацію та якщо це перший вхід – користувача буде додано у БД (зараз для цієї демо-версії додається тільки телефон, але це легко виправити)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Редагування користувачів 
+Якщо користувач зі статусом ‘admin’ заходить в меню в  ‘Users’ з БД підтягуються всі користувачі за винятком ролі ‘admin’. Всі поля ‘read only’ за винятком поля ‘role’, яке ‘admin’ може змінювати.
+При натисканні на поле відкривається діалог з селектом, де можна встановити роль. При підтвердженні, користувач (поле ‘role’) перезаписується в БД. Оновлюємо стан  та перемальовуємо UI.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Створення поїздки 
+Всі поїздки відображаються в «Trips».  Коли користувач натискає кнопку ‘Add trip’ відкривається форма де вносимо відповідні данні, окрім того необхідно вибрати водія (підтягаються з бази користувачі, в яких роль – ‘driver’). Якщо немає жодного користувача з роллю ‘driver’ – створити поїздку неможливо. 
+Після того, як поїздка була створена – записуємо її в базу, оновлюємо стан та перемальовуємо UI.
 
-### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Веб посилання на додаток: [CRM](https://noname-digital-1a2ed.web.app/).
 
-### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+***
+### Додаток ще у розробці. Буде додано такий функціонал:
+* додавання користувачем з роллю ‘admin’ та ‘dispatcher’ пасажирів у поїздку, зі списку користувачів з роллю ‘passenger’
+* запит на необхідні та недостаючи данні для користувачів, які реєструються за допомоги Google, Facebook та номеру телефону.
+* редагування користувачами своїх даних на персональної сторінці 
+* перегляд доступних поїздок та запит на участь у них від користувача з роллю ‘passenger’ та подальша обробка запиту з боку ‘admin’ та ‘dispatcher’
+***
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
